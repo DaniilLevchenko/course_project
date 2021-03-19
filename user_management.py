@@ -13,7 +13,6 @@ def main():
             print('Bye!')
             break
 
-
 #1
 def get_user_info():
     phone = get_phone()
@@ -27,7 +26,6 @@ def get_user_info():
         f'2. Ваш эмейл: {mail}\n'
         f'3.Ваш пароль: {"*" * len(password)}')
 
-
 #2
 def email():
     mail = input('Enter your email: ')
@@ -36,7 +34,6 @@ def email():
     elif mail.count('@') != 1:
         return email()
     return(mail)
-
 
 #3
 def gen_pass():
@@ -106,7 +103,6 @@ def show_user_phone():
                 n += 1
     elif choice_info == 'no':
         main()
-
 
 
 def user_list():
