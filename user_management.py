@@ -107,6 +107,7 @@ def check_phone(phone):
                 print('Данный номер уже зарегистрирован. Зарегистрируйте другой номер.')
                 return phone_valid()
 
+
 def user_list():
     user_info_list = []
     count = 0
