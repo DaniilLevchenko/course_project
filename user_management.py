@@ -1,43 +1,46 @@
+import random
+import string
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 
 def main():
     while True:
-        choice = input('1. Зарегистрировать нового пользователя\n2. Просмотреть список пользователей\n3. Выход из программы\n')
+        choice = input(
+            f'\n1. Зарегистрировать нового пользователя\n'
+            f'2. Просмотреть список пользователей\n'
+            f'3. Выход из программы\n')
         if choice == '1':
             get_user_info()
         elif choice == '2':
-            show_user_phone()
+            show_user()
         elif choice == '3':
-            print('Bye!')
+            print('\nПока!')
             break
 
-#1
+
 def get_user_info():
-    phone = get_phone()
+    phone = phone_valid()
     check_phone(phone)
-    mail = email()
-    password = gen_pass()
+    mail = get_email()
+    password = get_pass()
     save_data(phone, mail, password)
     print(
-        f'Поздравляем с успешной регистрацией!\n'
+        f'\nПоздравляем с успешной регистрацией!\n'
         f'1. Ваш номер телефона: {phone}\n'
         f'2. Ваш эмейл: {mail}\n'
-        f'3.Ваш пароль: {"*" * len(password)}')
+        f'3. Ваш пароль: {"*" * len(password)}')
 
-#2
-def email():
-    mail = input('Enter your email: ')
+
+def is_valid_email(mail):
     if len(mail) < 6:
-        return email()
+        return False
     elif mail.count('@') != 1:
-        return email()
-    return(mail)
+        return False
+    return mail
 
-#3
-def gen_pass():
-    password = input('Enter your password: ')
+
+def is_valid_pass(password):
     counter_d = counter_l = counter_u = 0
     for char in password:
         if char.isdigit():
@@ -48,19 +51,19 @@ def gen_pass():
             counter_l += 1
     if len(password) < 8:
         print('Пароль должен быть равен или длинее 8 символов.')
-        return gen_pass() 
+        return False
     if counter_l == 0 or counter_d == 0 or counter_u == 0:
         print('Пароль должен содержать минимум 1 строчную, 1 заглавную букву и 1 цифру.')
-        return gen_pass()
-    password_approve = input('Approve your password: ')
+        return False
+    password_approve = input('Подтвердите пароль: ')
     if password_approve != password:
         print('Пароли не совпадают!')
-        return gen_pass()
-    return password
+        return False
+    return True
 
-#4
-def get_phone():
-    phone = input('Enter phone number: ')
+
+def phone_valid():
+    phone = input('Введите Ваш номер телефона: ')
     edited_format = ''
     for char in phone:
         if char.isdigit():
@@ -71,39 +74,38 @@ def get_phone():
         edited_format = edited_format
     elif len(edited_format) < 9:
         print('Цифр недостаточно.')
-        return get_phone()
-    return(edited_format)
+        return phone_valid()
+    return edited_format
 
-#5
+
+def get_email():
+    mail = input('Введите эмейл: ')
+    if is_valid_email(mail):
+        return mail
+    else:
+        return get_email()
+
+
+def get_pass():
+    password = input('Введите пароль: ')
+    if is_valid_pass(password):
+        return password
+    else:
+        return get_pass()
+
+
 def save_data(phone, mail, password):
     with open(BASE_DIR / 'users.txt', 'a') as f:
         f.seek(0)
         f.write(f'{phone} {mail} {password}\n')
 
-#6
+
 def check_phone(phone):
     with open(BASE_DIR / 'users.txt', 'r') as f:
         for line in f:
             if phone in line:
                 print('Данный номер уже зарегистрирован. Зарегистрируйте другой номер.')
-                return get_phone()
-
-#7
-def show_user_phone():
-    user_list()
-    choice_info = input('Отобразить всех пользователей? yes/no: \n')
-    if choice_info == 'yes':
-        with open(BASE_DIR / 'users.txt', 'r') as f:
-            n = 1
-            f.seek(0)
-            for line in f.readlines():
-                user_phone = "".join(char for char in line if char.isdigit())
-                user_phone = user_phone[:12]
-                print(f'{n}. {user_phone}')
-                n += 1
-    elif choice_info == 'no':
-        main()
-
+                return phone_valid()
 
 def user_list():
     user_info_list = []
@@ -115,6 +117,94 @@ def user_list():
             count += 1
         print(f'Кол-во зарегистрированных пользователей: {count}')
     return user_info_list
+
+
+def show_user():
+    user_list()
+    choice_info = input('Отобразить всех пользователей? yes/no: \n')
+    if choice_info == 'yes':
+        show_phone()
+        show_info()
+    elif choice_info == 'no':
+        main()
+
+
+def show_phone():
+    with open(BASE_DIR / 'users.txt', 'r') as f:
+            n = 1
+            f.seek(0)
+            for line in f.readlines():
+                user_phone = "".join(char for char in line if char.isdigit())
+                user_phone = user_phone[:12]
+                print(f'\n{n}. {user_phone}')
+                n += 1
+    return
+
+
+def show_info():
+    n = int(input('Выберите порядковый номер пользователя: '))
+    n -= 1
+    with open(BASE_DIR / 'users.txt', 'r') as f:
+        f.seek(0)
+        info = f.readlines()
+        print(f'\n{info[n]}')
+    return user_operations(n)
+
+
+def user_operations(n):
+    choice = input(
+        f'1.Сбросить пароль\n'
+        f'2.Удалить пользователя\n'
+        f'3.Вернуться в главное меню\n')
+    if choice == '1':
+        generate_pass(n)
+    elif choice == '2':
+        delete_user(n)
+    elif choice == '3':
+        return
+
+
+def generate_pass(n):
+    with open(BASE_DIR / 'users.txt', 'r') as f:
+        data = f.readlines()
+    d = data[n]
+    d = d.split(' ')
+    d.pop()
+    new_password = strong_pass_gen()
+    new_password = ''.join(new_password)
+    print(f'\nВаш новый пароль: {new_password}')
+    d.append(new_password)
+    data[n] = ' '.join(d)
+    with open(BASE_DIR / "users.txt", "w") as f:
+        for lines in data:
+            f.write(lines)
+    return
+
+
+def strong_pass_gen():
+    counter_l = counter_u = counter_d = 0
+    p = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    password = random.sample(p, random.randint(8,16))
+    for char in password:
+        if char.islower():
+            counter_l += 1
+        elif char.isupper():
+            counter_u += 1
+        elif char.isdigit():
+            counter_d += 1
+    if counter_l > 0 and counter_u > 0 and counter_d > 0:
+        return password
+
+
+def delete_user(n):
+    with open(BASE_DIR / 'users.txt', 'r') as f:
+        data = f.readlines()
+        d = data[n]
+    with open(BASE_DIR / "users.txt", "w") as f:
+        for line in data:
+            if line != d:
+                f.write(line)
+    print(f'\nПользователь удалён.\n')
 
 
 if __name__ == "__main__":
